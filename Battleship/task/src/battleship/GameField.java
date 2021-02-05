@@ -36,6 +36,24 @@ public class GameField {
         return field;
     }
 
+    public static void changeGameField(int[] coordinates) {
+        int startRow = coordinates[0];
+        int startColumn = coordinates[1];
+        int finalRow = coordinates[2];
+        int finalColumn = coordinates[3];
+
+        boolean isVertical = startRow == finalRow;
+        if (isVertical) {
+            for (; startColumn <= finalColumn; startColumn++) {
+                field[startRow][startColumn] = "O";
+            }
+        } else {
+            for (; startRow <= finalRow; startRow++) {
+                field[startRow][startColumn] = "O";
+            }
+        }
+    }
+
     public static void printGameField() {
         for (String[] x : field) {
             for (String y : x) {
