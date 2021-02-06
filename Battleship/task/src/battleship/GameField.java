@@ -16,7 +16,7 @@ public class GameField {
         return gameField;
     }
 
-    public static String[][] makeField() {
+    private static String[][] makeField() {
         field = new String[11][11];
         char start = 'A';
         for (int i = 0; i < field.length; i++) {
@@ -36,14 +36,14 @@ public class GameField {
         return field;
     }
 
-    public static void changeGameField(int[] coordinates) {
+    public static void placeShip(int[] coordinates) {
         int startRow = coordinates[0];
         int startColumn = coordinates[1];
         int finalRow = coordinates[2];
         int finalColumn = coordinates[3];
 
-        boolean isVertical = startRow == finalRow;
-        if (isVertical) {
+        boolean isHorizontal = startRow == finalRow;
+        if (isHorizontal) {
             for (; startColumn <= finalColumn; startColumn++) {
                 field[startRow][startColumn] = "O";
             }
@@ -52,6 +52,33 @@ public class GameField {
                 field[startRow][startColumn] = "O";
             }
         }
+    }
+
+    public static boolean checkSurroundings(int[] coordinates) {
+        boolean isFree = true;
+
+        int startRow = coordinates[0] == 1 ? 1 : coordinates[0] - 1;
+        int startColumn = coordinates[1] == 1? 1 : coordinates[1] - 1;
+        int finalRow = coordinates[2] == 10 ? 10 : coordinates[2] + 1;
+        int finalColumn = coordinates[3] == 10 ? 10 : coordinates[3] + 1;
+
+        boolean isHorizontal = startRow == finalRow;
+        if (isHorizontal) {
+            for (; startColumn <= finalColumn; startColumn++) {
+                if (field[startRow][startColumn].equals("O")) {
+                    isFree = false;
+                    break;
+                }
+            }
+        } else {
+            for (; startRow <= finalRow; startRow++) {
+                if (field[startRow][startColumn].equals("O")) {
+                    isFree = false;
+                    break;
+                }
+            }
+        }
+        return isFree;
     }
 
     public static void printGameField() {
