@@ -5,6 +5,11 @@ package battleship;
  */
 public class GameField {
     private static GameField gameField;
+    final static String EMPTY = "~";
+    final static String PLACE = "O";
+    final static String MISS = "M";
+    final static String HIT = "X";
+
     private static String[][] field = makeField();
 
     private GameField() {}
@@ -29,7 +34,7 @@ public class GameField {
                 } else if (j == 0){
                     field[i][j] = String.valueOf(start++);
                 } else {
-                    field[i][j] = "~";
+                    field[i][j] = EMPTY;
                 }
             }
         }
@@ -45,11 +50,11 @@ public class GameField {
         boolean isHorizontal = startRow == finalRow;
         if (isHorizontal) {
             for (; startColumn <= finalColumn; startColumn++) {
-                field[startRow][startColumn] = "O";
+                field[startRow][startColumn] = PLACE;
             }
         } else {
             for (; startRow <= finalRow; startRow++) {
-                field[startRow][startColumn] = "O";
+                field[startRow][startColumn] = PLACE;
             }
         }
     }
@@ -65,20 +70,35 @@ public class GameField {
         boolean isHorizontal = startRow == finalRow;
         if (isHorizontal) {
             for (; startColumn <= finalColumn; startColumn++) {
-                if (field[startRow][startColumn].equals("O")) {
+                if (field[startRow][startColumn].equals(PLACE)) {
                     isFree = false;
                     break;
                 }
             }
         } else {
             for (; startRow <= finalRow; startRow++) {
-                if (field[startRow][startColumn].equals("O")) {
+                if (field[startRow][startColumn].equals(PLACE)) {
                     isFree = false;
                     break;
                 }
             }
         }
         return isFree;
+    }
+
+    public static void shooting(int[] shot) {
+        int row = shot[0];
+        int column = shot[1];
+        switch (field[row][column]) {
+            case PLACE:
+                System.out.println("You hit a ship!");
+                field[row][column] = HIT;
+                break;
+            case EMPTY:
+                System.out.println("You missed!");
+                field[row][column] = MISS;
+                break;
+        }
     }
 
     public static void printGameField() {
