@@ -1,7 +1,6 @@
 package battleship;
 
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 public class GameLogic {
     final static Scanner scanner = new Scanner(System.in);
@@ -20,23 +19,23 @@ public class GameLogic {
         return coordinates;
     }
 
+    private static LinkedHashMap<String, Integer> makeShipsList() {
+        LinkedHashMap<String, Integer> ships = new LinkedHashMap<>();
+        ships.put("Aircraft Carrier", 5);
+        ships.put("Battleship", 4);
+        ships.put("Submarine", 3);
+        ships.put("Cruiser", 3);
+        ships.put("Destroyer", 2);
+        return ships;
+    }
+
     public static void play() {
-        System.out.println("Enter the coordinates of the Aircraft Carrier (5 cells):");
-        GameField.placeShip(getCoordinates(5, "Aircraft Carrier"));
-        GameField.printGameField();
-        System.out.println("Enter the coordinates of the Battleship (4 cells):");
-        GameField.placeShip(getCoordinates(4, "Battleship"));
-        GameField.printGameField();
-        System.out.println("Enter the coordinates of the Submarine (3 cells):");
-        GameField.placeShip(getCoordinates(3, "Submarine"));
-        GameField.printGameField();
-        System.out.println("Enter the coordinates of the Cruiser (3 cells):");
-        GameField.placeShip(getCoordinates(3, "Cruiser"));
-        GameField.printGameField();
-        System.out.println("Enter the coordinates of the Destroyer (2 cells):");
-        GameField.placeShip(getCoordinates(2, "Destroyer"));
-        GameField.printGameField();
-        System.out.println("The game starts!");
+        for (Map.Entry<String, Integer> entry : makeShipsList().entrySet()) {
+            System.out.printf("Enter the coordinates of the %s (%d cells):%n", entry.getKey(), entry.getValue());
+            GameField.placeShip(getCoordinates(entry.getKey(), entry.getValue()));
+            GameField.printGameField();
+        }
+        System.out.println("The game starts!\nTake a shot!");
         GameField.shooting(setShot());
         GameField.printGameField();
     }
@@ -74,10 +73,9 @@ public class GameLogic {
     /**
      * Implement a method for check entered coordinates
      * @param sells of ship (5 - aircraft carrier, 4 - battleship, 3 - submarine, 3 - cruiser, 2 - destroyer)
-     * @param shipName
      * @return int[4] with start and final coordinates of ship
      */
-    private static int[] getCoordinates(int sells, String shipName) {
+    private static int[] getCoordinates(String shipName, int sells) {
         shipCoordinates = setCoordinates();
         String startCoordinate = shipCoordinates[0];
         String finalCoordinate = shipCoordinates[1];
@@ -106,7 +104,7 @@ public class GameLogic {
             if (!isNotTouchOthers) {
                 System.out.println("Error! You placed it too close to another one. Try again:");
             }
-            return getCoordinates(sells, shipName);
+            return getCoordinates(shipName, sells);
         }
     }
 
