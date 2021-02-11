@@ -19,20 +19,10 @@ public class GameLogic {
         return coordinates;
     }
 
-    private static LinkedHashMap<String, Integer> makeShipsList() {
-        LinkedHashMap<String, Integer> ships = new LinkedHashMap<>();
-        ships.put("Aircraft Carrier", 5);
-        ships.put("Battleship", 4);
-        ships.put("Submarine", 3);
-        ships.put("Cruiser", 3);
-        ships.put("Destroyer", 2);
-        return ships;
-    }
-
     public static void play() {
-        for (Map.Entry<String, Integer> entry : makeShipsList().entrySet()) {
-            System.out.printf("Enter the coordinates of the %s (%d cells):%n", entry.getKey(), entry.getValue());
-            GameField.placeShip(getCoordinates(entry.getKey(), entry.getValue()));
+        for (Ship ship : Ship.values()) {
+            System.out.printf("Enter the coordinates of the %s (%d cells):%n", ship.getShipName(), ship.getSells());
+            GameField.placeShip(getCoordinates(ship.getShipName(), ship.getSells()));
             GameField.printGameField();
         }
         System.out.println("The game starts!\nTake a shot!");
