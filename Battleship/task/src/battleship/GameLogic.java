@@ -4,9 +4,6 @@ import java.util.*;
 
 public class GameLogic {
     final static Scanner scanner = new Scanner(System.in);
-    private static String[] shipCoordinates;
-    private static String shot;
-    private final static ArrayList<String> allCoordinates = makeCoordinatesList();
 
     private static ArrayList<String> makeCoordinatesList() {
         ArrayList<String> coordinates = new ArrayList<>();
@@ -22,18 +19,19 @@ public class GameLogic {
     public static void play() {
         for (Ship ship : Ship.values()) {
             System.out.printf("Enter the coordinates of the %s (%d cells):%n", ship.getShipName(), ship.getSells());
-            GameField.placeShip(getCoordinates(ship.getShipName(), ship.getSells()));
-            GameField.printGameField();
+            GameField.getGameField().placeShip(getCoordinates(ship.getShipName(), ship.getSells()));
+            GameField.getGameField().printGameField();
         }
-        System.out.println("The game starts!\nTake a shot!");
-        GameField.shooting(setShot());
-        GameField.printGameField();
+        System.out.println("The game starts!");
+        System.out.println("Take a shot!");
+        GameField.getGameField().shooting(setShot());
+        GameField.getGameField().printGameField();
     }
 
     public static int[] setShot() {
-        shot = scanner.nextLine().toUpperCase().trim();
+        String shot = scanner.nextLine().toUpperCase().trim();
 
-        if (!allCoordinates.contains(shot)) {
+        if (!makeCoordinatesList().contains(shot)) {
             System.out.println("Error! You entered wrong coordinates! Try again:");
             setShot();
         }
@@ -43,11 +41,12 @@ public class GameLogic {
     }
 
     private static String[] setCoordinates() {
+        String[] shipCoordinates;
         while (true) {
             try {
                 shipCoordinates = scanner.nextLine().toUpperCase().split("\\s+");
                 for (int i = 0; i < 2; i++) {
-                    if (!allCoordinates.contains(shipCoordinates[i])) {
+                    if (!makeCoordinatesList().contains(shipCoordinates[i])) {
                         System.out.println("Error! Wrong ship location! Try again:");
                         setCoordinates();
                     }
@@ -66,7 +65,7 @@ public class GameLogic {
      * @return int[4] with start and final coordinates of ship
      */
     private static int[] getCoordinates(String shipName, int sells) {
-        shipCoordinates = setCoordinates();
+        String[]shipCoordinates = setCoordinates();
         String startCoordinate = shipCoordinates[0];
         String finalCoordinate = shipCoordinates[1];
 
@@ -79,10 +78,9 @@ public class GameLogic {
 
         boolean isCorrectLocation = startRow == finalRow || startColumn == finalColumn;
         boolean isRightSize = finalRow - startRow + 1 == sells || Math.abs(finalColumn - startColumn) + 1 == sells;
-        boolean isExist = allCoordinates.contains(startCoordinate) && allCoordinates.contains(finalCoordinate);
-        boolean isNotTouchOthers = GameField.checkSurroundings(coordinates);
+        boolean isNotTouchOthers = GameField.getGameField().checkSurroundings(coordinates);
 
-        if (isCorrectLocation && isRightSize && isExist && isNotTouchOthers) {
+        if (isCorrectLocation && isRightSize && isNotTouchOthers) {
             return coordinates;
         } else {
             if (!isCorrectLocation) {

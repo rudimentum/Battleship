@@ -5,12 +5,12 @@ package battleship;
  */
 public class GameField {
     private static GameField gameField;
-    final static String EMPTY = "~";
-    final static String PLACE = "O";
-    final static String MISS = "M";
-    final static String HIT = "X";
+    final String EMPTY = "~";
+    final String PLACE = "O";
+    final String MISS = "M";
+    final String HIT = "X";
 
-    private static String[][] field = makeField();
+    private String[][] field = makeField();
 
     private GameField() {}
 
@@ -21,7 +21,7 @@ public class GameField {
         return gameField;
     }
 
-    private static String[][] makeField() {
+    private String[][] makeField() {
         field = new String[11][11];
         char start = 'A';
         for (int i = 0; i < field.length; i++) {
@@ -41,7 +41,7 @@ public class GameField {
         return field;
     }
 
-    public static void placeShip(int[] coordinates) {
+    public void placeShip(int[] coordinates) {
         int startRow = coordinates[0];
         int startColumn = coordinates[1];
         int finalRow = coordinates[2];
@@ -59,7 +59,7 @@ public class GameField {
         }
     }
 
-    public static boolean checkSurroundings(int[] coordinates) {
+    public boolean checkSurroundings(int[] coordinates) {
         boolean isFree = true;
 
         int startRow = coordinates[0] == 1 ? 1 : coordinates[0] - 1;
@@ -86,7 +86,7 @@ public class GameField {
         return isFree;
     }
 
-    public static void shooting(int[] shot) {
+    public void shooting(int[] shot) {
         int row = shot[0];
         int column = shot[1];
         switch (field[row][column]) {
@@ -101,7 +101,7 @@ public class GameField {
         }
     }
 
-    public static void printGameField() {
+    public void printGameField() {
         for (String[] x : field) {
             for (String y : x) {
                 System.out.print(y + " ");
