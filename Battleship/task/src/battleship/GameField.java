@@ -10,6 +10,7 @@ public class GameField {
     final String MISS = "M";
     final String HIT = "X";
 
+    private final String[][] emptyField = makeField();
     private String[][] field = makeField();
 
     private GameField() {}
@@ -103,6 +104,15 @@ public class GameField {
 
     public void printGameField() {
         for (String[] x : field) {
+            for (String y : x) {
+                System.out.print(y + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public void printEmptyField() {
+        for (String[] x : emptyField) {
             for (String y : x) {
                 System.out.print(y + " ");
             }

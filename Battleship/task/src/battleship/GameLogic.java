@@ -23,6 +23,7 @@ public class GameLogic {
             GameField.getGameField().printGameField();
         }
         System.out.println("The game starts!");
+        GameField.getGameField().printEmptyField();
         System.out.println("Take a shot!");
         GameField.getGameField().shooting(setShot());
         GameField.getGameField().printGameField();
