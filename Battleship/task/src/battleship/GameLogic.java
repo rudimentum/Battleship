@@ -5,7 +5,7 @@ import java.util.*;
 public class GameLogic {
     final static Scanner scanner = new Scanner(System.in);
 
-    private static ArrayList<String> makeCoordinatesList() {
+    private ArrayList<String> makeCoordinatesList() {
         ArrayList<String> coordinates = new ArrayList<>();
 
         for (char start = 'A'; start <= 'J'; start++) {
@@ -16,20 +16,20 @@ public class GameLogic {
         return coordinates;
     }
 
-    public static void play() {
+    public void play() {
         for (Ship ship : Ship.values()) {
             System.out.printf("Enter the coordinates of the %s (%d cells):%n", ship.getShipName(), ship.getSells());
             GameField.getGameField().placeShip(getCoordinates(ship.getShipName(), ship.getSells()));
-            GameField.getGameField().printGameField();
+            GameField.getGameField().printField();
         }
         System.out.println("The game starts!");
         GameField.getGameField().printEmptyField();
         System.out.println("Take a shot!");
         GameField.getGameField().shooting(setShot());
-        GameField.getGameField().printGameField();
+        GameField.getGameField().printField();
     }
 
-    public static int[] setShot() {
+    public int[] setShot() {
         String shot = scanner.nextLine().toUpperCase().trim();
 
         if (!makeCoordinatesList().contains(shot)) {
@@ -41,7 +41,7 @@ public class GameLogic {
         return new int[]{row, column};
     }
 
-    private static String[] setCoordinates() {
+    private String[] setCoordinates() {
         String[] shipCoordinates;
         while (true) {
             try {
@@ -65,7 +65,7 @@ public class GameLogic {
      * @param sells of ship (5 - aircraft carrier, 4 - battleship, 3 - submarine, 3 - cruiser, 2 - destroyer)
      * @return int[4] with start and final coordinates of ship
      */
-    private static int[] getCoordinates(String shipName, int sells) {
+    private int[] getCoordinates(String shipName, int sells) {
         String[]shipCoordinates = setCoordinates();
         String startCoordinate = shipCoordinates[0];
         String finalCoordinate = shipCoordinates[1];
@@ -101,7 +101,7 @@ public class GameLogic {
      * @return coordinates in the right direction
      * Example: E6 D6 -> D6 E6; F7 F3 -> F3 F7
      */
-    private static int[] fixDirection(int startRow, int startColumn, int finalRow, int finalColumn) {
+    private int[] fixDirection(int startRow, int startColumn, int finalRow, int finalColumn) {
         return finalRow > startRow ? new int[]{startRow, startColumn, finalRow, finalColumn} :
                 finalColumn > startColumn ? new int[]{startRow, startColumn, finalRow, finalColumn} :
                         finalRow < startRow ? new int[]{finalRow, startColumn, startRow, finalColumn} :

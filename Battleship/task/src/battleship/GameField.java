@@ -102,7 +102,7 @@ public class GameField {
         }
     }
 
-    public void printGameField() {
+    public void printField() {
         for (String[] x : field) {
             for (String y : x) {
                 System.out.print(y + " ");
