@@ -381,6 +381,322 @@ files:
         }
     }
   learner_created: false
+- name: src/battleship/GameLogic.java
+  visible: true
+  text: |
+    package battleship;
+
+    import java.util.*;
+
+    public class GameLogic {
+        final static Scanner scanner = new Scanner(System.in);
+
+        private ArrayList<String> makeCoordinatesList() {
+            ArrayList<String> coordinates = new ArrayList<>();
+
+            for (char start = 'A'; start <= 'J'; start++) {
+                for (int i = 1; i < 11; i++) {
+                    coordinates.add(String.format("%c%d", start, i));
+                }
+            }
+            return coordinates;
+        }
+
+        public void play() {
+            GameField field = GameField.getGameField();
+            for (Ship ship : Ship.values()) {
+                System.out.printf("Enter the coordinates of the %s (%d cells):%n", ship.getShipName(), ship.getSells());
+                field.placeShip(getCoordinates(ship.getShipName(), ship.getSells()));
+            }
+            System.out.println("The game starts!");
+            field.printEmptyField();
+            while (true) {
+                System.out.println("Take a shot!");
+                field.shooting(setShot());
+                if (field.isEndOfGame()) {
+                    System.out.println("You sank the last ship. You won. Congratulations!");
+                    break;
+                }
+            }
+        }
+
+        public int[] setShot() {
+            try {
+                String shot = scanner.nextLine().toUpperCase().trim();
+                if (!makeCoordinatesList().contains(shot)) {
+                    throw new NumberFormatException();
+                }
+                int row = shot.charAt(0) - 'A' + 1;
+                int column = Integer.parseInt(shot.substring(1));
+                return new int[]{row, column};
+            } catch (NumberFormatException e) {
+                System.out.println("Error! You entered wrong coordinates! Try again:");
+                return setShot();
+            }
+        }
+
+        private String[] setCoordinates() {
+            String[] shipCoordinates;
+            while (true) {
+                try {
+                    shipCoordinates = scanner.nextLine().toUpperCase().split("\\s+");
+                    for (int i = 0; i < 2; i++) {
+                        if (!makeCoordinatesList().contains(shipCoordinates[i])) {
+                            System.out.println("Error! Wrong ship location! Try again:");
+                            setCoordinates();
+                        }
+                    }
+                    break;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.out.println("Error! Wrong ship location! Try again:");
+                }
+            }
+            return shipCoordinates;
+        }
+
+        /**
+         * Implement a method for check entered coordinates
+         * @param sells of ship (5 - aircraft carrier, 4 - battleship, 3 - submarine, 3 - cruiser, 2 - destroyer)
+         * @return int[4] with start and final coordinates of ship
+         */
+        private int[] getCoordinates(String shipName, int sells) {
+            GameField field = GameField.getGameField();
+            String[]shipCoordinates = setCoordinates();
+            String startCoordinate = shipCoordinates[0];
+            String finalCoordinate = shipCoordinates[1];
+
+            int startRow = startCoordinate.charAt(0) - 'A' + 1;
+            int startColumn = Integer.parseInt(startCoordinate.substring(1));
+            int finalRow = finalCoordinate.charAt(0) - 'A' + 1;
+            int finalColumn = Integer.parseInt(finalCoordinate.substring(1));
+
+            int[] coordinates = fixDirection(startRow, startColumn, finalRow, finalColumn);
+
+            boolean isCorrectLocation = startRow == finalRow || startColumn == finalColumn;
+            boolean isRightSize = finalRow - startRow + 1 == sells || Math.abs(finalColumn - startColumn) + 1 == sells;
+            boolean isNotTouchOthers = field.checkSurroundings(coordinates);
+
+            if (isCorrectLocation && isRightSize && isNotTouchOthers) {
+                return coordinates;
+            } else {
+                if (!isCorrectLocation) {
+                    System.out.println("Error! Wrong ship location! Try again:");
+                }
+                if (!isRightSize) {
+                    System.out.printf("Error! Wrong length of the %s! Try again:%n", shipName);
+                }
+                if (!isNotTouchOthers) {
+                    System.out.println("Error! You placed it too close to another one. Try again:");
+                }
+                return getCoordinates(shipName, sells);
+            }
+        }
+
+        /**
+         * @return coordinates in the right direction
+         * Example: E6 D6 -> D6 E6; F7 F3 -> F3 F7
+         */
+        private int[] fixDirection(int startRow, int startColumn, int finalRow, int finalColumn) {
+            return finalRow > startRow ? new int[]{startRow, startColumn, finalRow, finalColumn} :
+                    finalColumn > startColumn ? new int[]{startRow, startColumn, finalRow, finalColumn} :
+                            finalRow < startRow ? new int[]{finalRow, startColumn, startRow, finalColumn} :
+                                    new int[]{startRow, finalColumn, finalRow, startColumn};
+        }
+    }
+  learner_created: true
+- name: src/battleship/CellState.java
+  visible: true
+  text: |
+    package battleship;
+
+    public enum CellState {
+        EMPTY("~"),
+        FILL("O"),
+        MISS("M"),
+        HIT("X");
+
+        String state;
+
+        CellState(String state) {
+            this.state = state;
+        }
+
+        public String getState() {
+            return state;
+        }
+    }
+  learner_created: true
+- name: src/battleship/GameField.java
+  visible: true
+  text: |
+    package battleship;
+
+    import static battleship.CellState.*;
+
+    /**
+     * Singleton Lazy Initialization
+     */
+    public class GameField {
+        private static GameField gameField;
+
+        private final String[][] emptyField = makeField();
+        private String[][] field = makeField();
+
+        private GameField() {}
+
+        public static synchronized GameField getGameField() {
+            if (gameField == null) {
+                gameField = new GameField();
+            }
+            return gameField;
+        }
+
+        private String[][] makeField() {
+            field = new String[11][11];
+            char start = 'A';
+            for (int i = 0; i < field.length; i++) {
+                for (int j = 0; j < field[i].length; j++) {
+                    if (i == 0 && j == 0) {
+                        field[i][j] = " ";
+                    }
+                    else if (i == 0) {
+                        field[i][j] = String.valueOf(j);
+                    } else if (j == 0){
+                        field[i][j] = String.valueOf(start++);
+                    } else {
+                        field[i][j] = EMPTY.getState();
+                    }
+                }
+            }
+            return field;
+        }
+
+        public void placeShip(int[] coordinates) {
+            int startRow = coordinates[0];
+            int startColumn = coordinates[1];
+            int finalRow = coordinates[2];
+            int finalColumn = coordinates[3];
+
+            boolean isHorizontal = startRow == finalRow;
+            if (isHorizontal) {
+                for (; startColumn <= finalColumn; startColumn++) {
+                    field[startRow][startColumn] = FILL.getState();
+                }
+            } else {
+                for (; startRow <= finalRow; startRow++) {
+                    field[startRow][startColumn] = FILL.getState();
+                }
+            }
+
+            printField();
+        }
+
+        public boolean checkSurroundings(int... coordinates) {
+            boolean isFree = true;
+
+            int startRow = coordinates[0] == 1 ? 1 : coordinates[0] - 1;
+            int startColumn = coordinates[1] == 1? 1 : coordinates[1] - 1;
+            int finalRow = coordinates[2] == 10 ? 10 : coordinates[2] + 1;
+            int finalColumn = coordinates[3] == 10 ? 10 : coordinates[3] + 1;
+
+            boolean isHorizontal = startRow == finalRow;
+            if (isHorizontal) {
+                for (; startColumn <= finalColumn; startColumn++) {
+                    if (field[startRow][startColumn].equals(FILL.getState())) {
+                        isFree = false;
+                        break;
+                    }
+                }
+            } else {
+                for (; startRow <= finalRow; startRow++) {
+                    if (field[startRow][startColumn].equals(FILL.getState())) {
+                        isFree = false;
+                        break;
+                    }
+                }
+            }
+            return isFree;
+        }
+
+        public void shooting(int[] shot) {
+            int row = shot[0];
+            int column = shot[1];
+
+            if (field[row][column].equals(FILL.getState())) {
+                System.out.println("You hit a ship!");
+                emptyField[row][column] = HIT.getState();
+                if (checkSurroundings(row, column, row, column)) {
+                    System.out.println("You sank a ship! Specify a new target:");
+                }
+                field[row][column] = HIT.getState();
+            } else if (field[row][column].equals(EMPTY.getState())) {
+                System.out.println("You missed!");
+                emptyField[row][column] = MISS.getState();
+            }
+            printEmptyField();
+        }
+
+        public boolean isEndOfGame() {
+            boolean isEnd = true;
+            for (String[] x : field) {
+                for (String y : x) {
+                    if (y.equals(FILL.getState())) {
+                        isEnd = false;
+                        break;
+                    }
+                }
+            }
+            return isEnd;
+        }
+
+        public void printField() {
+            for (String[] x : field) {
+                for (String y : x) {
+                    System.out.print(y + " ");
+                }
+                System.out.println();
+            }
+        }
+
+        public void printEmptyField() {
+            for (String[] x : emptyField) {
+                for (String y : x) {
+                    System.out.print(y + " ");
+                }
+                System.out.println();
+            }
+        }
+    }
+  learner_created: true
+- name: src/battleship/Ship.java
+  visible: true
+  text: |
+    package battleship;
+
+    public enum Ship {
+        AIRCRAFT("Aircraft Carrier", 5),
+        BATTLESHIP("Battleship", 4),
+        SUBMARINE("Submarine", 3),
+        CRUISER("Cruiser", 3),
+        DESTROYER("Destroyer", 2);
+
+        String shipName;
+        int sells;
+
+        Ship(String shipName, int sells) {
+            this.shipName = shipName;
+            this.sells = sells;
+        }
+
+        public String getShipName() {
+            return shipName;
+        }
+
+        public int getSells() {
+            return sells;
+        }
+    }
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/125/stages/667/implement
 status: Unchecked
 record: -1

@@ -17,28 +17,36 @@ public class GameLogic {
     }
 
     public void play() {
+        GameField field = GameField.getGameField();
         for (Ship ship : Ship.values()) {
             System.out.printf("Enter the coordinates of the %s (%d cells):%n", ship.getShipName(), ship.getSells());
-            GameField.getGameField().placeShip(getCoordinates(ship.getShipName(), ship.getSells()));
-            GameField.getGameField().printField();
+            field.placeShip(getCoordinates(ship.getShipName(), ship.getSells()));
         }
         System.out.println("The game starts!");
-        GameField.getGameField().printEmptyField();
-        System.out.println("Take a shot!");
-        GameField.getGameField().shooting(setShot());
-        GameField.getGameField().printField();
+        field.printEmptyField();
+        while (true) {
+            System.out.println("Take a shot!");
+            field.shooting(setShot());
+            if (field.isEndOfGame()) {
+                System.out.println("You sank the last ship. You won. Congratulations!");
+                break;
+            }
+        }
     }
 
     public int[] setShot() {
-        String shot = scanner.nextLine().toUpperCase().trim();
-
-        if (!makeCoordinatesList().contains(shot)) {
+        try {
+            String shot = scanner.nextLine().toUpperCase().trim();
+            if (!makeCoordinatesList().contains(shot)) {
+                throw new NumberFormatException();
+            }
+            int row = shot.charAt(0) - 'A' + 1;
+            int column = Integer.parseInt(shot.substring(1));
+            return new int[]{row, column};
+        } catch (NumberFormatException e) {
             System.out.println("Error! You entered wrong coordinates! Try again:");
-            setShot();
+            return setShot();
         }
-        int row = shot.charAt(0) - 'A' + 1;
-        int column = Integer.parseInt(shot.substring(1));
-        return new int[]{row, column};
     }
 
     private String[] setCoordinates() {
@@ -66,6 +74,7 @@ public class GameLogic {
      * @return int[4] with start and final coordinates of ship
      */
     private int[] getCoordinates(String shipName, int sells) {
+        GameField field = GameField.getGameField();
         String[]shipCoordinates = setCoordinates();
         String startCoordinate = shipCoordinates[0];
         String finalCoordinate = shipCoordinates[1];
@@ -79,7 +88,7 @@ public class GameLogic {
 
         boolean isCorrectLocation = startRow == finalRow || startColumn == finalColumn;
         boolean isRightSize = finalRow - startRow + 1 == sells || Math.abs(finalColumn - startColumn) + 1 == sells;
-        boolean isNotTouchOthers = GameField.getGameField().checkSurroundings(coordinates);
+        boolean isNotTouchOthers = field.checkSurroundings(coordinates);
 
         if (isCorrectLocation && isRightSize && isNotTouchOthers) {
             return coordinates;

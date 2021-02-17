@@ -1,14 +1,12 @@
 package battleship;
 
+import static battleship.CellState.*;
+
 /**
  * Singleton Lazy Initialization
  */
 public class GameField {
     private static GameField gameField;
-    final String EMPTY = "~";
-    final String PLACE = "O";
-    final String MISS = "M";
-    final String HIT = "X";
 
     private final String[][] emptyField = makeField();
     private String[][] field = makeField();
@@ -35,7 +33,7 @@ public class GameField {
                 } else if (j == 0){
                     field[i][j] = String.valueOf(start++);
                 } else {
-                    field[i][j] = EMPTY;
+                    field[i][j] = EMPTY.getState();
                 }
             }
         }
@@ -51,16 +49,18 @@ public class GameField {
         boolean isHorizontal = startRow == finalRow;
         if (isHorizontal) {
             for (; startColumn <= finalColumn; startColumn++) {
-                field[startRow][startColumn] = PLACE;
+                field[startRow][startColumn] = FILL.getState();
             }
         } else {
             for (; startRow <= finalRow; startRow++) {
-                field[startRow][startColumn] = PLACE;
+                field[startRow][startColumn] = FILL.getState();
             }
         }
+
+        printField();
     }
 
-    public boolean checkSurroundings(int[] coordinates) {
+    public boolean checkSurroundings(int... coordinates) {
         boolean isFree = true;
 
         int startRow = coordinates[0] == 1 ? 1 : coordinates[0] - 1;
@@ -71,14 +71,14 @@ public class GameField {
         boolean isHorizontal = startRow == finalRow;
         if (isHorizontal) {
             for (; startColumn <= finalColumn; startColumn++) {
-                if (field[startRow][startColumn].equals(PLACE)) {
+                if (field[startRow][startColumn].equals(FILL.getState())) {
                     isFree = false;
                     break;
                 }
             }
         } else {
             for (; startRow <= finalRow; startRow++) {
-                if (field[startRow][startColumn].equals(PLACE)) {
+                if (field[startRow][startColumn].equals(FILL.getState())) {
                     isFree = false;
                     break;
                 }
@@ -90,16 +90,32 @@ public class GameField {
     public void shooting(int[] shot) {
         int row = shot[0];
         int column = shot[1];
-        switch (field[row][column]) {
-            case PLACE:
-                System.out.println("You hit a ship!");
-                field[row][column] = HIT;
-                break;
-            case EMPTY:
-                System.out.println("You missed!");
-                field[row][column] = MISS;
-                break;
+
+        if (field[row][column].equals(FILL.getState())) {
+            System.out.println("You hit a ship!");
+            emptyField[row][column] = HIT.getState();
+            if (checkSurroundings(row, column, row, column)) {
+                System.out.println("You sank a ship! Specify a new target:");
+            }
+            field[row][column] = HIT.getState();
+        } else if (field[row][column].equals(EMPTY.getState())) {
+            System.out.println("You missed!");
+            emptyField[row][column] = MISS.getState();
         }
+        printEmptyField();
+    }
+
+    public boolean isEndOfGame() {
+        boolean isEnd = true;
+        for (String[] x : field) {
+            for (String y : x) {
+                if (y.equals(FILL.getState())) {
+                    isEnd = false;
+                    break;
+                }
+            }
+        }
+        return isEnd;
     }
 
     public void printField() {
