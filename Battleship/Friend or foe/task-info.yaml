@@ -526,7 +526,36 @@ files:
         }
     }
   learner_created: true
-- name: src/battleship/GameField.java
+- name: src/battleship/Ship.java
+  visible: true
+  text: |
+    package battleship;
+
+    public enum Ship {
+        AIRCRAFT("Aircraft Carrier", 5),
+        BATTLESHIP("Battleship", 4),
+        SUBMARINE("Submarine", 3),
+        CRUISER("Cruiser", 3),
+        DESTROYER("Destroyer", 2);
+
+        String shipName;
+        int sells;
+
+        Ship(String shipName, int sells) {
+            this.shipName = shipName;
+            this.sells = sells;
+        }
+
+        public String getShipName() {
+            return shipName;
+        }
+
+        public int getSells() {
+            return sells;
+        }
+    }
+  learner_created: true
+- name: src/battleship/Player.java
   visible: true
   text: |
     package battleship;
@@ -668,35 +697,9 @@ files:
         }
     }
   learner_created: true
-- name: src/battleship/Ship.java
-  visible: true
-  text: |
-    package battleship;
-
-    public enum Ship {
-        AIRCRAFT("Aircraft Carrier", 5),
-        BATTLESHIP("Battleship", 4),
-        SUBMARINE("Submarine", 3),
-        CRUISER("Cruiser", 3),
-        DESTROYER("Destroyer", 2);
-
-        String shipName;
-        int sells;
-
-        Ship(String shipName, int sells) {
-            this.shipName = shipName;
-            this.sells = sells;
-        }
-
-        public String getShipName() {
-            return shipName;
-        }
-
-        public int getSells() {
-            return sells;
-        }
-    }
-  learner_created: true
 feedback_link: https://hyperskill.org/projects/125/stages/667/implement
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Fri, 19 Feb 2021 17:02:01 UTC
 record: -1

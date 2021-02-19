@@ -3,9 +3,9 @@ package battleship;
 public class Main {
 
     public static void main(String[] args) {
-        GameField gameField = GameField.getGameField();
+        Player firstPlayer = new Player();
+        Player secondPlayer = new Player();
         GameLogic game = new GameLogic();
-        gameField.printField();
-        game.play();
+        game.play(firstPlayer, secondPlayer);
     }
 }

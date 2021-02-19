@@ -2,26 +2,17 @@ package battleship;
 
 import static battleship.CellState.*;
 
-/**
- * Singleton Lazy Initialization
- */
-public class GameField {
-    private static GameField gameField;
+public class Player {
+    private String[][] ownField;
+    private String[][] enemyField;
 
-    private final String[][] emptyField = makeField();
-    private String[][] field = makeField();
-
-    private GameField() {}
-
-    public static synchronized GameField getGameField() {
-        if (gameField == null) {
-            gameField = new GameField();
-        }
-        return gameField;
+    public Player() {
+        this.ownField = makeField();
+        this.enemyField = makeField();
     }
 
     private String[][] makeField() {
-        field = new String[11][11];
+        String[][] field = new String[11][11];
         char start = 'A';
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
@@ -40,6 +31,18 @@ public class GameField {
         return field;
     }
 
+    public String getOwnCell(int row, int column) {
+        return ownField[row][column];
+    }
+
+    public void changeOwnCell(int row, int column, CellState cellState) {
+        ownField[row][column] = cellState.getState();
+    }
+
+    public void changeEnemyCell(int row, int column, CellState cellState) {
+        enemyField[row][column] = cellState.getState();
+    }
+
     public void placeShip(int[] coordinates) {
         int startRow = coordinates[0];
         int startColumn = coordinates[1];
@@ -49,11 +52,11 @@ public class GameField {
         boolean isHorizontal = startRow == finalRow;
         if (isHorizontal) {
             for (; startColumn <= finalColumn; startColumn++) {
-                field[startRow][startColumn] = FILL.getState();
+                ownField[startRow][startColumn] = FILL.getState();
             }
         } else {
             for (; startRow <= finalRow; startRow++) {
-                field[startRow][startColumn] = FILL.getState();
+                ownField[startRow][startColumn] = FILL.getState();
             }
         }
 
@@ -71,14 +74,14 @@ public class GameField {
         boolean isHorizontal = startRow == finalRow;
         if (isHorizontal) {
             for (; startColumn <= finalColumn; startColumn++) {
-                if (field[startRow][startColumn].equals(FILL.getState())) {
+                if (ownField[startRow][startColumn].equals(FILL.getState())) {
                     isFree = false;
                     break;
                 }
             }
         } else {
             for (; startRow <= finalRow; startRow++) {
-                if (field[startRow][startColumn].equals(FILL.getState())) {
+                if (ownField[startRow][startColumn].equals(FILL.getState())) {
                     isFree = false;
                     break;
                 }
@@ -87,27 +90,9 @@ public class GameField {
         return isFree;
     }
 
-    public void shooting(int[] shot) {
-        int row = shot[0];
-        int column = shot[1];
-
-        if (field[row][column].equals(FILL.getState())) {
-            System.out.println("You hit a ship!");
-            emptyField[row][column] = HIT.getState();
-            if (checkSurroundings(row, column, row, column)) {
-                System.out.println("You sank a ship! Specify a new target:");
-            }
-            field[row][column] = HIT.getState();
-        } else if (field[row][column].equals(EMPTY.getState())) {
-            System.out.println("You missed!");
-            emptyField[row][column] = MISS.getState();
-        }
-        printEmptyField();
-    }
-
     public boolean isEndOfGame() {
         boolean isEnd = true;
-        for (String[] x : field) {
+        for (String[] x : ownField) {
             for (String y : x) {
                 if (y.equals(FILL.getState())) {
                     isEnd = false;
@@ -119,7 +104,7 @@ public class GameField {
     }
 
     public void printField() {
-        for (String[] x : field) {
+        for (String[] x : ownField) {
             for (String y : x) {
                 System.out.print(y + " ");
             }
@@ -128,7 +113,7 @@ public class GameField {
     }
 
     public void printEmptyField() {
-        for (String[] x : emptyField) {
+        for (String[] x : enemyField) {
             for (String y : x) {
                 System.out.print(y + " ");
             }

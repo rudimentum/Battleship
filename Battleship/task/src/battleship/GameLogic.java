@@ -1,6 +1,7 @@
 package battleship;
 
 import java.util.*;
+import static battleship.CellState.*;
 
 public class GameLogic {
     final static Scanner scanner = new Scanner(System.in);
@@ -16,25 +17,64 @@ public class GameLogic {
         return coordinates;
     }
 
-    public void play() {
-        GameField field = GameField.getGameField();
-        for (Ship ship : Ship.values()) {
-            System.out.printf("Enter the coordinates of the %s (%d cells):%n", ship.getShipName(), ship.getSells());
-            field.placeShip(getCoordinates(ship.getShipName(), ship.getSells()));
-        }
-        System.out.println("The game starts!");
-        field.printEmptyField();
-        while (true) {
-            System.out.println("Take a shot!");
-            field.shooting(setShot());
-            if (field.isEndOfGame()) {
-                System.out.println("You sank the last ship. You won. Congratulations!");
-                break;
-            }
+    public void play(Player firstPlayer, Player secondPlayer) {
+        arrangeShips(firstPlayer, 1);
+        arrangeShips(secondPlayer, 2);
+        while (!firstPlayer.isEndOfGame() && !secondPlayer.isEndOfGame()) {
+            makeMove(firstPlayer, secondPlayer, 1);
+            makeMove(secondPlayer, firstPlayer, 2);
         }
     }
 
-    public int[] setShot() {
+    private void passMove() {
+        System.out.println("Press Enter and pass the move to another player\n. . .");
+        scanner.nextLine();
+    }
+
+    private void arrangeShips(Player player, int number) {
+        System.out.printf("Player %d, place your ships on the game field%n", number);
+        player.printField();
+        for (Ship ship : Ship.values()) {
+            System.out.printf("Enter the coordinates of the %s (%d cells):%n", ship.getShipName(), ship.getSells());
+            player.placeShip(getCoordinates(player, ship.getShipName(), ship.getSells()));
+        }
+        passMove();
+    }
+
+    private void makeMove(Player player, Player enemy, int number) {
+        player.printEmptyField();
+        System.out.println("---------------------");
+        player.printField();
+        System.out.printf("Player %d, it's your turn:%n", number);
+        shooting(player, enemy, setShot());
+        passMove();
+    }
+
+    private void shooting(Player player, Player enemy, int[] shot) {
+        int row = shot[0];
+        int column = shot[1];
+
+        if (enemy.getOwnCell(row, column).equals(FILL.getState())) {
+            System.out.println("You hit a ship!");
+            enemy.changeOwnCell(row, column, HIT);
+            player.changeEnemyCell(row, column, HIT);
+            if (enemy.isEndOfGame()) {
+                System.out.println("You sank the last ship. You won. Congratulations!");
+                return;
+            }
+            if (enemy.checkSurroundings(row, column, row, column)) {
+                System.out.println("You sank a ship! Specify a new target:");
+            }
+        } else if (enemy.getOwnCell(row, column).equals(EMPTY.getState())) {
+            System.out.println("You missed!");
+            enemy.changeOwnCell(row, column, MISS);
+            player.changeEnemyCell(row, column, MISS);
+        } else {
+            System.out.println("You have already shot at this target! Specify a new target:");
+        }
+    }
+
+    private int[] setShot() {
         try {
             String shot = scanner.nextLine().toUpperCase().trim();
             if (!makeCoordinatesList().contains(shot)) {
@@ -73,8 +113,7 @@ public class GameLogic {
      * @param sells of ship (5 - aircraft carrier, 4 - battleship, 3 - submarine, 3 - cruiser, 2 - destroyer)
      * @return int[4] with start and final coordinates of ship
      */
-    private int[] getCoordinates(String shipName, int sells) {
-        GameField field = GameField.getGameField();
+    private int[] getCoordinates(Player player, String shipName, int sells) {
         String[]shipCoordinates = setCoordinates();
         String startCoordinate = shipCoordinates[0];
         String finalCoordinate = shipCoordinates[1];
@@ -87,8 +126,11 @@ public class GameLogic {
         int[] coordinates = fixDirection(startRow, startColumn, finalRow, finalColumn);
 
         boolean isCorrectLocation = startRow == finalRow || startColumn == finalColumn;
-        boolean isRightSize = finalRow - startRow + 1 == sells || Math.abs(finalColumn - startColumn) + 1 == sells;
-        boolean isNotTouchOthers = field.checkSurroundings(coordinates);
+        System.out.println(isCorrectLocation);
+        boolean isRightSize = Math.abs(finalRow - startRow) + 1 == sells || Math.abs(finalColumn - startColumn) + 1 == sells;
+        System.out.println(isRightSize);
+        boolean isNotTouchOthers = player.checkSurroundings(coordinates);
+        System.out.println(isNotTouchOthers);
 
         if (isCorrectLocation && isRightSize && isNotTouchOthers) {
             return coordinates;
@@ -102,7 +144,7 @@ public class GameLogic {
             if (!isNotTouchOthers) {
                 System.out.println("Error! You placed it too close to another one. Try again:");
             }
-            return getCoordinates(shipName, sells);
+            return getCoordinates(player, shipName, sells);
         }
     }
 
