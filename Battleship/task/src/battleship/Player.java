@@ -3,13 +3,10 @@ package battleship;
 import static battleship.CellState.*;
 
 public class Player {
-    private String[][] ownField;
-    private String[][] enemyField;
+    protected String[][] ownField = makeField();
+    protected String[][] enemyField = makeField();
 
-    public Player() {
-        this.ownField = makeField();
-        this.enemyField = makeField();
-    }
+    public Player() {}
 
     private String[][] makeField() {
         String[][] field = new String[11][11];
